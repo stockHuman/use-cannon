@@ -6,6 +6,8 @@ import {
   Plane,
   Box,
   Vec3,
+  Mat3,
+  Quaternion,
   ConvexPolyhedron,
   Cylinder,
   Heightfield,
@@ -19,6 +21,7 @@ import {
   LockConstraint,
   Constraint,
   Spring,
+  Material,
 } from 'cannon-es'
 
 let bodies = {}
@@ -35,6 +38,27 @@ const TYPES = {
 function syncBodies() {
   self.postMessage({ op: 'sync', bodies: world.bodies.map(body => body.uuid) })
   bodies = world.bodies.reduce((acc, body) => ({ ...acc, [body.uuid]: body }), {})
+}
+
+const setProperty = (k, body, value) => {
+  const propType = typeof body[k]
+  switch (propType) {
+    case 'boolean':
+    case 'number':
+    case 'string':
+      body[k] = value
+      break
+    default:
+      if (body[k] instanceof Vec3) {
+        body[k].set(value[0], value[1], value[2])
+      } else if (body[k] instanceof Quaternion) {
+        if (k === 'rotation') body.quaternion.setFromEuler(value[0], value[1], value[2], 'XYZ')
+        else body[k].setFromEuler(value[0], value[1], value[2], 'XYZ')
+      } else console.log('None found', body, k, propType)
+      break
+  }
+
+  if (k === 'fixedRotation') body.updateMassProperties()
 }
 
 self.onmessage = e => {
@@ -165,6 +189,10 @@ self.onmessage = e => {
     case 'removeBodies': {
       for (let i = 0; i < uuid.length; i++) world.removeBody(bodies[uuid[i]])
       syncBodies()
+      break
+    }
+    case 'set': {
+      Object.keys(props).map(k => setProperty(k, bodies[uuid], props[k]))
       break
     }
     case 'setPosition': {

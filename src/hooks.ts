@@ -149,6 +149,9 @@ function useBody(type: ShapeType, fn: BodyFn, argFn: ArgFn, deps: any[] = []): A
 
   const api = useMemo(() => {
     return {
+      set(props: any) {
+        if (ref.current) worker.postMessage({ op: 'set', uuid: ref.current.uuid, props })
+      },
       setPosition(x: number, y: number, z: number) {
         if (ref.current) worker.postMessage({ op: 'setPosition', uuid: ref.current.uuid, props: [x, y, z] })
       },
