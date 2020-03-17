@@ -112,11 +112,12 @@ self.onmessage = e => {
           rotation = [0, 0, 0],
           scale = [1, 1, 1],
           type: bodyType,
+          mass,
           onCollide,
           ...extra
         } = props[i]
 
-        const body = new Body({ ...extra, type: TYPES[bodyType] })
+        const body = new Body({ ...extra, mass: bodyType === 'Static' ? 0 : mass, type: TYPES[bodyType] })
         body.uuid = uuid[i]
 
         switch (type) {
@@ -125,9 +126,6 @@ self.onmessage = e => {
             break
           case 'ConvexPolyhedron':
             const [v, f, n] = args
-            console.log('vertices', v)
-            console.log('faces', f)
-            console.log('normals', n)
             const shape = new ConvexPolyhedron(
               v.map(([x, y, z]) => new Vec3(x, y, z)),
               f
@@ -262,6 +260,7 @@ self.onmessage = e => {
           break
         case 'Distance':
           constraint = new DistanceConstraint(bodies[bodyA], bodies[bodyB], optns.distance, optns.maxForce)
+          console.log(constraint)
           break
         case 'Lock':
           constraint = new LockConstraint(bodies[bodyA], bodies[bodyB], optns)
