@@ -22,13 +22,15 @@ import {
   Quaternion as ThreeQuaternion,
 } from 'three'
 import type { Body } from 'cannon-es'
-import type { Scene } from 'three'
+import type { Scene, Color } from 'three'
 
 type ComplexShape = Shape & { geometryId?: number }
 
-export function renderWireframes(scene: Scene, bodies: Body[]) {
+type WireframeOptions = { color?: string | number | Color }
+
+export function renderWireframes(scene: Scene, bodies: Body[], options: WireframeOptions = {}) {
   const _meshes: Mesh[] = []
-  const _material = new MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
+  const _material = new MeshBasicMaterial({ color: options.color ?? 0x00ff00, wireframe: true })
   const _tempVec0 = new CannonVector3()
   const _tempVec1 = new CannonVector3()
   const _tempVec2 = new CannonVector3()
@@ -135,21 +137,21 @@ export function renderWireframes(scene: Scene, bodies: Body[]) {
 
       case CONVEXPOLYHEDRON: {
         const geometry = createConvexPolyhedronGeometry(shape as ConvexPolyhedron)
-        mesh = new Mesh(geometry, _material) as Mesh
+        mesh = new Mesh(geometry, _material)
         ;(shape as ComplexShape).geometryId = geometry.id
         break
       }
 
       case TRIMESH: {
         const geometry = createTrimeshGeometry(shape as Trimesh)
-        mesh = new Mesh(geometry, _material) as Mesh
+        mesh = new Mesh(geometry, _material)
         ;(shape as ComplexShape).geometryId = geometry.id
         break
       }
 
       case HEIGHTFIELD: {
         const geometry = createHeightfieldGeometry(shape as Heightfield)
-        mesh = new Mesh(geometry, _material) as Mesh
+        mesh = new Mesh(geometry, _material)
         ;(shape as ComplexShape).geometryId = geometry.id
         break
       }
