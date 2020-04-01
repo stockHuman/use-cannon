@@ -374,14 +374,14 @@ function useConstraint(
   }, deps)
 
   const api = useMemo(() => {
-    const post = (op: string, props: any) => worker.postMessage({ op, uuid, props })
+    const post = (op: string, props?: any) => worker.postMessage({ op, uuid, props })
     const makeVec = (op: string) => ({
       set: (x: number, y: number, z: number) => post(op, [x, y, z]),
       copy: ({ x, y, z }: THREE.Vector3 | THREE.Euler) => post(op, [x, y, z]),
     })
     return {
-      enable: () => post('enableConstraint', uuid),
-      disable: () => post('disableConstraint', uuid),
+      enable: () => post('enableConstraint'),
+      disable: () => post('disableConstraint'),
       pivotA: makeVec('setPivotA'),
       pivotB: makeVec('setPivotB'),
     }
