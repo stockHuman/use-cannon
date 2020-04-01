@@ -341,6 +341,8 @@ type ConstraintApi = [
   {
     enable: () => void
     disable: () => void
+    pivotA: WorkerVec
+    pivotB: WorkerVec
   }
 ]
 
@@ -371,13 +373,19 @@ function useConstraint(
     }
   }, deps)
 
-  const api = useMemo(
-    () => ({
-      enable: () => worker.postMessage({ op: 'enableConstraint', uuid }),
-      disable: () => worker.postMessage({ op: 'disableConstraint', uuid }),
-    }),
-    deps
-  )
+  const api = useMemo(() => {
+    const post = (op: string, props: any) => worker.postMessage({ op, uuid, props })
+    const makeVec = (op: string) => ({
+      set: (x: number, y: number, z: number) => post(op, [x, y, z]),
+      copy: ({ x, y, z }: THREE.Vector3 | THREE.Euler) => post(op, [x, y, z]),
+    })
+    return {
+      enable: () => post('enableConstraint', uuid),
+      disable: () => post('disableConstraint', uuid),
+      pivotA: makeVec('setPivotA'),
+      pivotB: makeVec('setPivotB'),
+    }
+  }, deps)
 
   return [bodyA, bodyB, api]
 }

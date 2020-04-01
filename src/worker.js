@@ -296,15 +296,22 @@ self.onmessage = (e) => {
     case 'removeConstraint':
       world.removeConstraint(uuid)
       break
-
     case 'enableConstraint':
       world.constraints.filter(({ uuid: thisId }) => thisId === uuid).map((c) => c.enable())
       break
-
     case 'disableConstraint':
       world.constraints.filter(({ uuid: thisId }) => thisId === uuid).map((c) => c.disable())
       break
-
+    case 'setPivotA':
+      world.constraints
+        .filter(({ uuid: thisId }) => thisId === uuid)
+        .map((c) => (c.pivotA = new Vec3(...props)))
+      break
+    case 'setPivotB':
+      world.constraints
+        .filter(({ uuid: thisId }) => thisId === uuid)
+        .map((c) => (c.pivotB = new Vec3(...props)))
+      break
     case 'addSpring': {
       const [bodyA, bodyB, optns] = props
       let { worldAnchorA, worldAnchorB, localAnchorA, localAnchorB, restLength, stiffness, damping } = optns
